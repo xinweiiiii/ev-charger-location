@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useMap } from "react-leaflet/hooks";
 import dynamic from "next/dynamic";
 
 // Load react-leaflet bits client-side only (no SSR)
@@ -530,52 +531,51 @@ export default function EVChargerFinder() {
           <CardContent>
             <div className="h-[520px] w-full rounded-2xl overflow-hidden border">
               {/* MapContainer renders only on client; we also avoid SSR via dynamic() */}
-              <MapContainer
-                center={[center.lat, center.lng]}
-                zoom={12}
-                className="h-full w-full"
-                whenCreated={(map) => (mapRef.current = map)}
-              >
-                <TileLayer
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
+             <MapContainer
+              center={[center.lat, center.lng]}
+              zoom={12}
+              className="h-full w-full"
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
 
-                {/* user marker */}
-                <Marker position={[userLoc.lat, userLoc.lng]} icon={markerIcon}>
-                  <Popup>You are here</Popup>
-                </Marker>
+              {/* fly to latest center */}
+              <FlyTo center={center} />
 
-                {/* charger markers */}
-                {results.map((c: any) => (
-                  <Marker
-                    key={c.id}
-                    position={[c.coords.lat, c.coords.lng]}
-                    icon={markerIcon}
-                    eventHandlers={{ click: () => setSelected(c) }}
-                  >
-                    <Popup>
-                      <div className="space-y-1">
-                        <div className="font-semibold">{c.name}</div>
-                        <div className="text-xs text-slate-600">{c.address}</div>
-                        <div className="text-xs flex items-center gap-2">
-                          <Badge
-                            variant={c.status === "available" ? "default" : "secondary"}
-                            className="capitalize"
-                          >
-                            {c.status}
-                          </Badge>
-                          <Badge variant="outline">{c.powerKW} kW</Badge>
-                          <Badge variant="outline">S${c.pricePerKWh.toFixed(2)}/kWh</Badge>
-                        </div>
-                        <Button size="sm" className="w-full mt-2" onClick={() => setSelected(c)}>
-                          Details
-                        </Button>
+              {/* user marker */}
+              <Marker position={[userLoc.lat, userLoc.lng]} icon={markerIcon}>
+                <Popup>You are here</Popup>
+              </Marker>
+
+              {/* charger markers */}
+              {results.map((c: any) => (
+                <Marker
+                  key={c.id}
+                  position={[c.coords.lat, c.coords.lng]}
+                  icon={markerIcon}
+                  eventHandlers={{ click: () => setSelected(c) }}
+                >
+                  <Popup>
+                    <div className="space-y-1">
+                      <div className="font-semibold">{c.name}</div>
+                      <div className="text-xs text-slate-600">{c.address}</div>
+                      <div className="text-xs flex items-center gap-2">
+                        <Badge variant={c.status === "available" ? "default" : "secondary"} className="capitalize">
+                          {c.status}
+                        </Badge>
+                        <Badge variant="outline">{c.powerKW} kW</Badge>
+                        <Badge variant="outline">S${c.pricePerKWh.toFixed(2)}/kWh</Badge>
                       </div>
-                    </Popup>
-                  </Marker>
-                ))}
-              </MapContainer>
+                      <Button size="sm" className="w-full mt-2" onClick={() => setSelected(c)}>
+                        Details
+                      </Button>
+                    </div>
+                  </Popup>
+                </Marker>
+              ))}
+            </MapContainer>
             </div>
           </CardContent>
         </Card>
@@ -793,4 +793,12 @@ function median(arr: number[]) {
   const a = [...arr].sort((x, y) => x - y);
   const mid = Math.floor(a.length / 2);
   return a.length % 2 ? a[mid] : (a[mid - 1] + a[mid]) / 2;
+}
+
+function FlyTo({ center }: { center: { lat: number; lng: number } }) {
+  const map = useMap();
+  useEffect(() => {
+    map.flyTo(center as any, 13, { duration: 0.75 });
+  }, [center, map]);
+  return null;
 }
