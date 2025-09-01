@@ -88,11 +88,8 @@ const DEFAULT_CHARGERS = [
     name: "Suntec City Carpark B1",
     coords: { lat: 1.2931, lng: 103.8572 },
     address: "3 Temasek Blvd, Singapore 038983",
-    network: "Charge+",
-    connectors: ["CCS2", "Type2"],
     powerKW: 60,
     pricePerKWh: 0.5,
-    status: "available",
     amenities: ["Mall", "Toilets", "Food Court"],
     updatedAt: Date.now() - 1000 * 60 * 5,
   },
@@ -101,11 +98,8 @@ const DEFAULT_CHARGERS = [
     name: "ION Orchard L5 EV Bays",
     coords: { lat: 1.304, lng: 103.8318 },
     address: "2 Orchard Turn, Singapore 238801",
-    network: "SP Group",
-    connectors: ["CCS2", "Type2", "CHAdeMO"],
     powerKW: 150,
     pricePerKWh: 0.55,
-    status: "occupied",
     amenities: ["Mall", "Food", "ATM"],
     updatedAt: Date.now() - 1000 * 60 * 2,
   },
@@ -114,11 +108,8 @@ const DEFAULT_CHARGERS = [
     name: "Jewel Changi B2 Superchargers",
     coords: { lat: 1.3603, lng: 103.9894 },
     address: "78 Airport Blvd, Singapore 819666",
-    network: "Tesla",
-    connectors: ["Tesla", "CCS2"],
     powerKW: 250,
-    pricePerKWh: 0.65,
-    status: "available",
+    pricePerKWh: 0.55,
     amenities: ["Mall", "Playground", "Attractions"],
     updatedAt: Date.now() - 1000 * 60 * 12,
   },
@@ -127,11 +118,8 @@ const DEFAULT_CHARGERS = [
     name: "Star Vista Basement Chargers",
     coords: { lat: 1.3065, lng: 103.7908 },
     address: "1 Vista Exchange Green, Singapore 138617",
-    network: "Charge+",
-    connectors: ["Type2"],
     powerKW: 22,
     pricePerKWh: 0.45,
-    status: "available",
     amenities: ["Mall", "Cinema"],
     updatedAt: Date.now() - 1000 * 60 * 24,
   },
@@ -140,11 +128,8 @@ const DEFAULT_CHARGERS = [
     name: "Vivocity Rooftop EV",
     coords: { lat: 1.2644, lng: 103.8223 },
     address: "1 HarbourFront Walk, Singapore 098585",
-    network: "SP Group",
-    connectors: ["CCS2"],
     powerKW: 120,
     pricePerKWh: 0.52,
-    status: "available",
     amenities: ["Mall", "Sentosa Link"],
     updatedAt: Date.now() - 1000 * 60 * 7,
   },
@@ -153,11 +138,8 @@ const DEFAULT_CHARGERS = [
     name: "Marina Bay Sands Carpark",
     coords: { lat: 1.2834, lng: 103.8607 },
     address: "10 Bayfront Ave, Singapore 018956",
-    network: "BlueSG",
-    connectors: ["Type2"],
     powerKW: 43,
     pricePerKWh: 0.48,
-    status: "occupied",
     amenities: ["Hotel", "Mall"],
     updatedAt: Date.now() - 1000 * 60 * 9,
   },
@@ -166,11 +148,8 @@ const DEFAULT_CHARGERS = [
     name: "NTU North Hill Chargers",
     coords: { lat: 1.3483, lng: 103.6831 },
     address: "50 Nanyang Ave, Singapore 639798",
-    network: "Shell Recharge",
-    connectors: ["CCS2", "Type2"],
     powerKW: 50,
     pricePerKWh: 0.49,
-    status: "available",
     amenities: ["Campus", "Cafe"],
     updatedAt: Date.now() - 1000 * 60 * 30,
   },
@@ -179,11 +158,8 @@ const DEFAULT_CHARGERS = [
     name: "Tuas West Road (Public Carpark)",
     coords: { lat: 1.3397, lng: 103.6384 },
     address: "Tuas West Rd, Singapore",
-    network: "JomCharge",
-    connectors: ["CCS2", "CHAdeMO"],
     powerKW: 60,
     pricePerKWh: 0.47,
-    status: "available",
     amenities: ["Restrooms"],
     updatedAt: Date.now() - 1000 * 60 * 45,
   },
@@ -192,11 +168,8 @@ const DEFAULT_CHARGERS = [
     name: "Paya Lebar Quarter B3",
     coords: { lat: 1.317, lng: 103.8925 },
     address: "10 Paya Lebar Rd, Singapore 409057",
-    network: "SP Group",
-    connectors: ["CCS2", "Type2"],
     powerKW: 90,
     pricePerKWh: 0.51,
-    status: "available",
     amenities: ["Mall"],
     updatedAt: Date.now() - 1000 * 60 * 14,
   },
@@ -205,18 +178,12 @@ const DEFAULT_CHARGERS = [
     name: "Westgate Carpark",
     coords: { lat: 1.3347, lng: 103.742 },
     address: "3 Gateway Dr, Singapore 608532",
-    network: "Charge+",
-    connectors: ["Type2"],
     powerKW: 22,
     pricePerKWh: 0.44,
-    status: "available",
     amenities: ["Mall"],
     updatedAt: Date.now() - 1000 * 60 * 18,
   },
 ];
-
-const CONNECTOR_OPTIONS = ["CCS2", "Type2", "CHAdeMO", "Tesla"];
-const NETWORKS = ["Any", "SP Group", "Charge+", "Tesla", "BlueSG", "Shell Recharge", "JomCharge"];
 
 function kmToStr(km: number) {
   if (km < 1) return `${Math.round(km * 1000)} m`;
@@ -256,39 +223,16 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 export default function EVChargerFinder() {
   const [chargers, setChargers] = useLocalStorage("evcf_chargers", DEFAULT_CHARGERS);
   const [query, setQuery] = useState("");
-  const [connector, setConnector] = useState("Any");
   const [minPower, setMinPower] = useState<number[]>([22]);
   const [maxPrice, setMaxPrice] = useState<number[]>([0.65]);
   const [onlyAvailable, setOnlyAvailable] = useState(false);
-  const [network, setNetwork] = useState("Any");
   const [sortBy, setSortBy] = useState<"distance" | "power" | "price" | "updated">("distance");
   const [userLoc, setUserLoc] = useLocalStorage("evcf_userloc", { lat: 1.3521, lng: 103.8198 });
   const [selected, setSelected] = useState<any | null>(null);
   const [center, setCenter] = useState(userLoc);
-  const [busyTick, setBusyTick] = useState(0);
 
   // Keep the Leaflet map instance to fly programmatically
   const mapRef = useRef<L.Map | null>(null);
-
-  // Simulate status updates
-  useEffect(() => {
-    const t = setInterval(() => setBusyTick((n) => n + 1), 15000);
-    return () => clearInterval(t);
-  }, []);
-
-  useEffect(() => {
-    if (!busyTick) return;
-    setChargers((prev: any[]) => {
-      const copy = [...prev];
-      const i = Math.floor(Math.random() * copy.length);
-      copy[i] = {
-        ...copy[i],
-        status: copy[i].status === "available" ? "occupied" : "available",
-        updatedAt: Date.now(),
-      };
-      return copy;
-    });
-  }, [busyTick, setChargers]);
 
   useEffect(() => {
     if (mapRef.current) {
@@ -305,9 +249,7 @@ export default function EVChargerFinder() {
           c.name.toLowerCase().includes(q) ||
           c.address.toLowerCase().includes(q)
         const matchesPrice = c.pricePerKWh <= maxPrice[0] + 1e-9;
-        const matchesAvail = !onlyAvailable || c.status === "available";
-        const matchesNetwork = network === "Any" || c.network === network;
-        return matchesQ && matchesPrice && matchesAvail && matchesNetwork;
+        return matchesQ && matchesPrice;
       })
       .map((c: any) => ({
         ...c,
@@ -326,11 +268,22 @@ export default function EVChargerFinder() {
     return filtered.sort(sorter);
   }, [chargers, query, minPower, maxPrice, onlyAvailable, userLoc, sortBy]);
 
-  const handleLocate = () => {
-    if (!navigator.geolocation) {
-      toast.error("Geolocation not supported");
-      return;
-    }
+const handleLocate = () => {
+  if (!("geolocation" in navigator)) {
+    toast.error("Geolocation not supported in this browser");
+    return;
+  }
+
+  let attempts = 0;
+
+  const opts: PositionOptions = {
+    enableHighAccuracy: true,    // use GPS/Wi-Fi if possible
+    timeout: 8000,               // fail faster
+    maximumAge: 30_000           // accept cached fix up to 30s old
+  };
+
+  const request = () => {
+    attempts += 1;
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
@@ -338,9 +291,26 @@ export default function EVChargerFinder() {
         setCenter(c);
         toast.success("Location updated");
       },
-      () => toast.error("Couldn't get your location")
+      (err) => {
+        // Common Safari/macOS codes:
+        // 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE, 3: TIMEOUT
+        if (err.code === 1) {
+          toast.error("Location permission denied. Enable it in browser/site settings.");
+          return;
+        }
+        if (attempts < 3) {
+          // brief backoff then retry
+          setTimeout(request, attempts * 1500);
+        } else {
+          toast.error("Couldn’t get your location. Enter coordinates or try again.");
+        }
+      },
+      opts
     );
   };
+
+  request();
+};
 
   const copyShare = async () => {
     const params = new URLSearchParams({
@@ -418,40 +388,6 @@ export default function EVChargerFinder() {
               <Button variant="outline" size="icon" onClick={() => setQuery("")}>
                 <RefreshCw className="h-4 w-4" />
               </Button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label className="text-xs text-slate-500 mb-1 block">Connector</Label>
-                <Select value={connector} onValueChange={setConnector}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Any">Any</SelectItem>
-                    {CONNECTOR_OPTIONS.map((c) => (
-                      <SelectItem key={c} value={c}>
-                        {c}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label className="text-xs text-slate-500 mb-1 block">Network</Label>
-                <Select value={network} onValueChange={setNetwork}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Any" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {NETWORKS.map((n) => (
-                      <SelectItem key={n} value={n}>
-                        {n}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -562,15 +498,9 @@ export default function EVChargerFinder() {
                       <div className="font-semibold">{c.name}</div>
                       <div className="text-xs text-slate-600">{c.address}</div>
                       <div className="text-xs flex items-center gap-2">
-                        <Badge variant={c.status === "available" ? "default" : "secondary"} className="capitalize">
-                          {c.status}
-                        </Badge>
                         <Badge variant="outline">{c.powerKW} kW</Badge>
                         <Badge variant="outline">S${c.pricePerKWh.toFixed(2)}/kWh</Badge>
                       </div>
-                      <Button size="sm" className="w-full mt-2" onClick={() => setSelected(c)}>
-                        Details
-                      </Button>
                     </div>
                   </Popup>
                 </Marker>
@@ -602,23 +532,10 @@ export default function EVChargerFinder() {
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base flex items-center justify-between gap-2">
                             <span className="line-clamp-1">{c.name}</span>
-                            <Badge
-                              variant={c.status === "available" ? "default" : "secondary"}
-                              className="capitalize"
-                            >
-                              {c.status}
-                            </Badge>
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-2 text-sm">
                           <div className="text-slate-600 line-clamp-2">{c.address}</div>
-                          <div className="flex flex-wrap gap-2">
-                            {c.connectors.map((t: string) => (
-                              <Badge key={t} variant="outline">
-                                {t}
-                              </Badge>
-                            ))}
-                          </div>
                           <div className="grid grid-cols-3 gap-2 text-xs">
                             <div className="rounded-lg border p-2 flex items-center gap-2">
                               <Zap className="h-4 w-4" /> {c.powerKW} kW
@@ -631,10 +548,7 @@ export default function EVChargerFinder() {
                             </div>
                           </div>
                           <div className="flex gap-2 pt-1">
-                            <Button className="flex-1" onClick={() => setSelected(c)}>
-                              <Smartphone className="h-4 w-4 mr-1" /> Details
-                            </Button>
-                            <Button variant="outline" asChild>
+                            <Button asChild className="flex-1">
                               <a
                                 href={`https://www.google.com/maps/dir/?api=1&destination=${c.coords.lat},${c.coords.lng}`}
                                 target="_blank"
@@ -673,10 +587,6 @@ export default function EVChargerFinder() {
                     value={Math.round(median(results.map((r: any) => r.powerKW)))}
                   />
                   <Stat
-                    label="Available now"
-                    value={results.filter((r: any) => r.status === "available").length}
-                  />
-                  <Stat
                     label="Avg. distance (km)"
                     value={
                       results.length
@@ -706,15 +616,7 @@ export default function EVChargerFinder() {
               </SheetHeader>
               <div className="mt-4 space-y-3 text-sm">
                 <div className="text-slate-700">{selected.address}</div>
-                <div className="flex flex-wrap gap-2">
-                  {selected.connectors.map((t: string) => (
-                    <Badge key={t} variant="outline">
-                      {t}
-                    </Badge>
-                  ))}
-                </div>
                 <div className="grid grid-cols-2 gap-2">
-                  <Info label="Network" value={selected.network} />
                   <Info label="Power" value={`${selected.powerKW} kW`} />
                   <Info label="Price" value={`S$${selected.pricePerKWh.toFixed(2)}/kWh`} />
                   <Info label="Distance" value={kmToStr(selected.distanceKm)} />
