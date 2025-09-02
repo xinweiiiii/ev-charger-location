@@ -129,6 +129,35 @@ export default function EVChargerFinder() {
   const [selected, setSelected] = useState<any | null>(null);
   const [center, setCenter] = useState(userLoc);
 
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function tryGeolocate() {
+      if (!("geolocation" in navigator)) return; // keep default center
+
+      // (Optional) check permission to avoid prompting unexpectedly
+      try {
+        const status = await (navigator as any).permissions?.query?.({ name: "geolocation" as any });
+        if (status && status.state === "denied") return;
+      } catch {/* ignore */}
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          if (cancelled) return;
+          const c = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          setUserLoc(c);
+          setCenter(c);
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      );
+    }
+
+    tryGeolocate();
+    return () => { cancelled = true; };
+  }, []);
+
   // Keep the Leaflet map instance to fly programmatically
   const mapRef = useRef<L.Map | null>(null);
 
