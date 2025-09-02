@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { useMap } from "react-leaflet/hooks";
 import dynamic from "next/dynamic";
 
@@ -117,7 +118,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 }
 
 export default function EVChargerFinder() {
-  const [chargers, setChargers] = useLocalStorage("evcf_chargers", []);
+  const [chargers, setChargers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
   const [minPower, setMinPower] = useState<number[]>([22]);
@@ -386,6 +387,13 @@ const handleLocate = () => {
           <CardContent>
             <div className="h-[520px] w-full rounded-2xl overflow-hidden border">
               {/* MapContainer renders only on client; we also avoid SSR via dynamic() */}
+             
+            {loading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-white/70 z-[1000]">
+                <Loader2 className="h-8 w-8 animate-spin text-slate-600" />
+                <span className="ml-2 text-sm text-slate-600">Loading map…</span>
+              </div>
+            )}
              <MapContainer
               center={[center.lat, center.lng]}
               zoom={12}
