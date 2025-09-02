@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { searchChargers } from "../../../../lib/searchCharger";
+import { searchChargers } from "@/lib/searchCharger";
 
-
-export const runtime = "nodejs";        // optional
-export const dynamic = "force-dynamic"; // optional (disable prerendering)
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
